@@ -1,11 +1,11 @@
-name: Generate and Build Backstage App
+name: Generate, Build and Dockerize Backstage
 
 on:
-  workflow_dispatch:  # Manual trigger only
+  workflow_dispatch:
 
 jobs:
-  generate-build-docker:
-    runs-on: self-hosted  # Your EC2 Ubuntu runner
+  build-backstage:
+    runs-on: self-hosted
 
     env:
       APP_NAME: mybackstage
@@ -22,10 +22,18 @@ jobs:
       - name: Install Yarn Classic
         run: npm install -g yarn
 
-      - name: Generate Backstage App (non-interactive)
+      - name: Install expect (for interactive automation)
+        run: sudo apt-get update && sudo apt-get install -y expect
+
+      - name: Generate Backstage App Non-Interactively
         run: |
-          npx @backstage/create-app $APP_NAME --skip-install --no-interactive
-          
+          expect <<EOF
+          spawn npx @backstage/create-app
+          expect "Enter a name for the app"
+          send "$env(APP_NAME)\r"
+          expect eof
+          EOF
+
       - name: Install Dependencies
         run: yarn install --immutable
         working-directory: ${{ env.APP_NAME }}
@@ -35,6 +43,5 @@ jobs:
         working-directory: ${{ env.APP_NAME }}
 
       - name: Build Docker Image
-        run: |
-          docker build -f packages/backend/Dockerfile -t backstage .
+        run: docker build -f packages/backend/Dockerfile -t backstage .
         working-directory: ${{ env.APP_NAME }}
