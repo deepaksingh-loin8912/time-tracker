@@ -47,21 +47,21 @@ jobs:
         run: rm -f .yarnrc.yml
         working-directory: ${{ env.APP_NAME }}
         
-      - name: Clean up Yarn strict settings after generation
+      - name: Reset Yarn to v3 and disable strict mode
         run: |
-          rm -f .yarnrc.yml
-          rm -rf .yarn
-          mkdir .yarn
+          cd $APP_NAME
+
+          # Remove yarn v4 artifacts
+          rm -rf .yarn .yarnrc.yml
+
+          # Remove the yarn@4.x reference in package.json
+          sed -i '/"packageManager": "yarn@4.4.1"/d' package.json
+
+          # Use Yarn v3 (no PnP or immutable issues)
+          corepack prepare yarn@3.6.4 --activate
+
+          # Write minimal config to use node_modules
           echo "nodeLinker: node-modules" > .yarnrc.yml
-        working-directory: ${{ env.APP_NAME }}
-
-      - name: Force disable Yarn immutable install
-        run: |
-            cd $APP_NAME
-
-            rm -rf .yarn .yarnrc.yml
-            echo "nodeLinker: node-modules" > .yarnrc.yml
-            corepack prepare yarn@3.6.4 --activate
 
       - name: Install Dependencies
         run: yarn install 
