@@ -19,8 +19,11 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Install Yarn Classic
-        run: npm install -g yarn
+      - name: Enable Corepack and install correct Yarn version
+        run: |
+          corepack enable
+          corepack prepare yarn@4.4.1 --activate
+
 
       - name: Install expect (for automating prompts)
         run: sudo apt-get update && sudo apt-get install -y expect
