@@ -47,8 +47,11 @@ jobs:
         run: rm -f .yarnrc.yml
         working-directory: ${{ env.APP_NAME }}
         
-      - name: Switch Yarn to node_modules linker (disable PnP strictness)
+      - name: Clean up Yarn strict settings after generation
         run: |
+          rm -f .yarnrc.yml
+          rm -rf .yarn
+          mkdir .yarn
           echo "nodeLinker: node-modules" > .yarnrc.yml
         working-directory: ${{ env.APP_NAME }}
 
