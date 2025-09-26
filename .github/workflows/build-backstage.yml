@@ -24,7 +24,7 @@ jobs:
 
       - name: Generate Backstage App (non-interactive)
         run: |
-          npx @backstage/create-app@latest --skip-install --app-name $APP_NAME
+          npx @backstage/create-app $APP_NAME --skip-install
           
       - name: Install Dependencies
         run: yarn install --immutable
