@@ -40,6 +40,10 @@ jobs:
         env:
           APP_NAME: mybackstage
 
+      - name: Remove Yarn config (optional)
+        run: rm -f .yarnrc.yml
+        working-directory: ${{ env.APP_NAME }}
+
       - name: Install Dependencies
         run: yarn install 
         working-directory: ${{ env.APP_NAME }}
