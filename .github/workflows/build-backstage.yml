@@ -46,6 +46,11 @@ jobs:
       - name: Remove Yarn config (optional)
         run: rm -f .yarnrc.yml
         working-directory: ${{ env.APP_NAME }}
+        
+      - name: Switch Yarn to node_modules linker (disable PnP strictness)
+        run: |
+          echo "nodeLinker: node-modules" > .yarnrc.yml
+        working-directory: ${{ env.APP_NAME }}
 
       - name: Install Dependencies
         run: yarn install 
