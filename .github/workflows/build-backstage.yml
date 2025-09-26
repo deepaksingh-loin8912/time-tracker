@@ -55,6 +55,14 @@ jobs:
           echo "nodeLinker: node-modules" > .yarnrc.yml
         working-directory: ${{ env.APP_NAME }}
 
+      - name: Force disable Yarn immutable install
+        run: |
+            cd $APP_NAME
+
+            rm -rf .yarn .yarnrc.yml
+            echo "nodeLinker: node-modules" > .yarnrc.yml
+            corepack prepare yarn@3.6.4 --activate
+
       - name: Install Dependencies
         run: yarn install 
         working-directory: ${{ env.APP_NAME }}
