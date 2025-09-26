@@ -1,33 +1,40 @@
-name: Build Backstage Docker Image
+name: Generate and Build Backstage App
 
 on:
-  push:
-    branches:
-      - main
-  workflow_dispatch:
+  workflow_dispatch:  # Manual trigger only
 
 jobs:
-  build-backstage:
-    runs-on: self-hosted  # This uses your EC2 Ubuntu runner
+  generate-build-docker:
+    runs-on: self-hosted  # Your EC2 Ubuntu runner
+
+    env:
+      APP_NAME: mybackstage
 
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Set up Node.js (v20)
+      - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
 
-      - name: Install Yarn Classic (v1.x)
+      - name: Install Yarn Classic
         run: npm install -g yarn
 
+      - name: Generate Backstage App (non-interactive)
+        run: |
+          npx @backstage/create-app@latest --skip-install --path $APP_NAME --yes
+          
       - name: Install Dependencies
         run: yarn install --immutable
+        working-directory: ${{ env.APP_NAME }}
 
-      - name: Build Backstage Backend
+      - name: Build Backend
         run: yarn workspace backend build
+        working-directory: ${{ env.APP_NAME }}
 
       - name: Build Docker Image
         run: |
           docker build -f packages/backend/Dockerfile -t backstage .
+        working-directory: ${{ env.APP_NAME }}
