@@ -47,21 +47,17 @@ jobs:
         run: rm -f .yarnrc.yml
         working-directory: ${{ env.APP_NAME }}
         
+      - name: Install jq
+        run: sudo apt-get update && sudo apt-get install -y jq
+
       - name: Reset Yarn to v3 and disable strict mode
         run: |
           cd $APP_NAME
-
-          # Remove yarn v4 artifacts
           rm -rf .yarn .yarnrc.yml
-
-          # Remove the yarn@4.x reference in package.json
-          sed -i '/"packageManager": "yarn@4.4.1"/d' package.json
-
-          # Use Yarn v3 (no PnP or immutable issues)
+          jq 'del(.packageManager)' package.json > tmp.json && mv tmp.json package.json
           corepack prepare yarn@3.6.4 --activate
-
-          # Write minimal config to use node_modules
           echo "nodeLinker: node-modules" > .yarnrc.yml
+
 
       - name: Install Dependencies
         run: yarn install 
