@@ -5,7 +5,7 @@ on:
 
 jobs:
   build-backstage:
-    runs-on: self-hosted  # Your EC2 runner
+    runs-on: self-hosted  # Your EC2 runner or similar
 
     env:
       APP_NAME: mybackstage
@@ -19,7 +19,7 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Enable Corepack and install correct Yarn version
+      - name: Enable Corepack and install Yarn 4.4.1 globally
         run: |
           corepack enable
           corepack prepare yarn@4.4.1 --activate
@@ -27,7 +27,7 @@ jobs:
       - name: Install expect (for automating prompts)
         run: sudo apt-get update && sudo apt-get install -y expect
 
-      - name: Clean existing app folder (optional but recommended)
+      - name: Clean existing app folder (optional)
         run: rm -rf $APP_NAME
 
       - name: Generate Backstage App Non-Interactively
@@ -68,22 +68,14 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Patch Dockerfile to fix Yarn v3 focus issue
-        run: |
-          DOCKERFILE="packages/backend/Dockerfile"
-          awk '
-            BEGIN {
-              replacement = "RUN --mount=type=cache,target=/home/node/.cache/yarn,sharing=locked,uid=1000,gid=1000 npm install -g corepack && corepack enable && corepack prepare yarn@3.6.4 --activate && yarn workspaces focus --all --production && yarn cache clean"
-            }
-            /yarn workspaces focus/ {
-              print replacement
-              next
-            }
-            { print }
-          ' "$DOCKERFILE" > "$DOCKERFILE.tmp" && mv "$DOCKERFILE.tmp" "$DOCKERFILE"
+      - name: Patch Dockerfile
         working-directory: ${{ env.APP_NAME }}
+        run: |
+         sed -i "/yarn workspaces focus/c\
+         RUN --mount=type=cache,target=/home/node/.cache/yarn,sharing=locked,uid=1000,gid=1000 npm install -g corepack && corepack enable && corepack prepare yarn@3.6.4 --activate && yarn workspaces focus --all --production && yarn cache clean" packages/backend/Dockerfile
+
 
       - name: Build Docker Image
         run: |
-          docker buildx build --load -f packages/backend/Dockerfile -t backstage .
+          docker buildx build -f packages/backend/Dockerfile -t backstage . --load
         working-directory: ${{ env.APP_NAME }}
