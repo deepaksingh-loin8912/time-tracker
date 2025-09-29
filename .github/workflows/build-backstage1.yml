@@ -69,6 +69,12 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
+      - name: Fix Dockerfile invalid yarn cache command
+        run: |
+           sed -i 's/rm -rf "\$(yarn cache clean)"/yarn cache clean/' packages/backend/Dockerfile
+        working-directory: ${{ env.APP_NAME }}
+
+
       - name: Build Docker Image
         run: |
           docker buildx build -f packages/backend/Dockerfile -t backstage .
