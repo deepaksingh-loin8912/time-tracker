@@ -75,12 +75,12 @@ jobs:
 
       - name: Patch Dockerfile to use Yarn v3 correctly
         run: |
-          DOCKERFILE="packages/backend/Dockerfile"
-          sed -i '/yarn workspaces focus/{
-            N
-            s|RUN.*yarn workspaces focus.*|RUN npm install -g corepack \&\& corepack enable \&\& corepack prepare yarn@3.6.4 --activate \&\& yarn workspaces focus --all --production \&\& yarn cache clean|
-            }' "$DOCKERFILE"
+            DOCKERFILE="packages/backend/Dockerfile"
+            sed -i '/yarn workspaces focus/{
+            s|RUN.*|RUN npm install -g corepack \&\& corepack enable \&\& corepack prepare yarn@3.6.4 --activate \&\& yarn workspaces focus --all --production \&\& yarn cache clean|
+             }' "$DOCKERFILE"
         working-directory: ${{ env.APP_NAME }}
+
 
 
       - name: Build Docker Image
