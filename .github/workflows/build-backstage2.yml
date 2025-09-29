@@ -5,7 +5,7 @@ on:
 
 jobs:
   build-backstage:
-    runs-on: self-hosted  # Your EC2 runner or similar
+    runs-on: self-hosted  # or ubuntu-latest if you want GitHub runners
 
     env:
       APP_NAME: mybackstage
@@ -14,12 +14,12 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Set up Node.js
+      - name: Set up Node.js 20
         uses: actions/setup-node@v4
         with:
           node-version: '20'
 
-      - name: Enable Corepack and install Yarn 4.4.1 globally
+      - name: Enable Corepack and install Yarn 4.4.1
         run: |
           corepack enable
           corepack prepare yarn@4.4.1 --activate
@@ -27,8 +27,8 @@ jobs:
       - name: Install expect (for automating prompts)
         run: sudo apt-get update && sudo apt-get install -y expect
 
-      - name: Clean existing app folder (optional)
-        run: rm -rf $APP_NAME
+      - name: Clean existing app folder
+        run: rm -rf ${{ env.APP_NAME }}
 
       - name: Generate Backstage App Non-Interactively
         run: |
@@ -40,14 +40,14 @@ jobs:
             expect eof
           "
         env:
-          APP_NAME: mybackstage
+          APP_NAME: ${{ env.APP_NAME }}
 
       - name: Install jq
         run: sudo apt-get update && sudo apt-get install -y jq
 
       - name: Reset Yarn to v3 and disable strict mode
         run: |
-          cd $APP_NAME
+          cd ${{ env.APP_NAME }}
           jq 'del(.packageManager)' package.json > tmp.json && mv tmp.json package.json
           corepack prepare yarn@3.6.4 --activate
           echo "nodeLinker: node-modules" > .yarnrc.yml
@@ -62,20 +62,18 @@ jobs:
         run: yarn workspace backend build
         working-directory: ${{ env.APP_NAME }}
 
+      - name: Patch Dockerfile to fix Yarn v3 focus issue
+        working-directory: ${{ env.APP_NAME }}
+        run: |
+          sed -i "/yarn workspaces focus/c\
+          RUN --mount=type=cache,target=/home/node/.cache/yarn,sharing=locked,uid=1000,gid=1000 npm install -g corepack && corepack enable && corepack prepare yarn@3.6.4 --activate && yarn workspaces focus --all --production && yarn cache clean" packages/backend/Dockerfile
+
       - name: Enable Docker BuildKit
         run: echo "DOCKER_BUILDKIT=1" >> $GITHUB_ENV
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Patch Dockerfile
-        working-directory: ${{ env.APP_NAME }}
-        run: |
-         sed -i "/yarn workspaces focus/c\
-         RUN --mount=type=cache,target=/home/node/.cache/yarn,sharing=locked,uid=1000,gid=1000 npm install -g corepack && corepack enable && corepack prepare yarn@3.6.4 --activate && yarn workspaces focus --all --production && yarn cache clean" packages/backend/Dockerfile
-
-
       - name: Build Docker Image
-        run: |
-          docker buildx build -f packages/backend/Dockerfile -t backstage . --load
         working-directory: ${{ env.APP_NAME }}
+        run: docker buildx build -f packages/backend/Dockerfile -t backstage . --load
