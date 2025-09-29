@@ -62,12 +62,13 @@ jobs:
         run: yarn workspace backend build
         working-directory: ${{ env.APP_NAME }}
 
-      - name: Patch Dockerfile to fix Yarn version inside Docker
+      - name: Patch Dockerfile to fix Yarn v3 command
         run: |
           DOCKERFILE="packages/backend/Dockerfile"
           sed -i '/yarn workspaces focus/ c\
           RUN --mount=type=cache,target=/home/node/.cache/yarn,sharing=locked,uid=1000,gid=1000 npm install -g corepack \&\& corepack enable \&\& corepack prepare yarn@3.6.4 --activate \&\& yarn workspaces focus --all --production \&\& yarn cache clean' "$DOCKERFILE"
         working-directory: ${{ env.APP_NAME }}
+
 
 
       - name: Enable Docker BuildKit
