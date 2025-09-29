@@ -71,6 +71,15 @@ jobs:
 
       - name: Enable Docker BuildKit
         run: echo "DOCKER_BUILDKIT=1" >> $GITHUB_ENV
+        
+
+      - name: Build Docker Image
+        run: docker build -f packages/backend/Dockerfile -t backstage . 
+        working-directory: ${{ env.APP_NAME }}
+
+
+
+        
 
 
       - name: Build Docker Image
