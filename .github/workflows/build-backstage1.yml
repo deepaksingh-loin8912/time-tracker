@@ -1,0 +1,75 @@
+name: Generate, Build, and Dockerize Backstage
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-backstage:
+    runs-on: self-hosted  # EC2 runner
+
+    env:
+      APP_NAME: mybackstage
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Enable Corepack and install correct Yarn version
+        run: |
+          corepack enable
+          corepack prepare yarn@4.4.1 --activate
+
+      - name: Install expect (for automating prompts)
+        run: sudo apt-get update && sudo apt-get install -y expect
+
+      - name: Clean existing app folder (optional but recommended)
+        run: rm -rf $APP_NAME
+
+      - name: Generate Backstage App Non-Interactively
+        run: |
+          expect -c "
+            set appname \$env(APP_NAME)
+            spawn npx @backstage/create-app
+            expect \"Enter a name for the app\"
+            send \"\$appname\r\"
+            expect eof
+          "
+        env:
+          APP_NAME: mybackstage
+
+      - name: Install jq
+        run: sudo apt-get update && sudo apt-get install -y jq
+
+      - name: Reset Yarn to v3 and disable strict mode
+        run: |
+          cd $APP_NAME
+          jq 'del(.packageManager)' package.json > tmp.json && mv tmp.json package.json
+          corepack prepare yarn@3.6.4 --activate
+          echo "nodeLinker: node-modules" > .yarnrc.yml
+
+      - name: Install Dependencies
+        run: yarn install
+        working-directory: ${{ env.APP_NAME }}
+        env:
+          YARN_ENABLE_IMMUTABLE_INSTALLS: false
+
+      - name: Build Backend
+        run: yarn workspace backend build
+        working-directory: ${{ env.APP_NAME }}
+
+      # --- Docker setup for BuildKit ---
+      - name: Enable Docker BuildKit
+        run: echo "DOCKER_BUILDKIT=1" >> $GITHUB_ENV
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker Image
+        run: |
+          docker buildx build -f packages/backend/Dockerfile -t backstage .
+        working-directory: ${{ env.APP_NAME }}
