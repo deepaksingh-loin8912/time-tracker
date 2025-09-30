@@ -77,12 +77,8 @@ jobs:
           yarn workspace backend build
           yarn build:backend
         shell: bash
-      - name: Install Docker Buildx
-        run: |
-          mkdir -p ~/.docker/cli-plugins
-          curl -sSL https://github.com/docker/buildx/releases/latest/download/buildx-linux-amd64 -o ~/.docker/cli-plugins/docker-buildx
-          chmod +x ~/.docker/cli-plugins/docker-buildx
-          docker buildx version
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
       - name: Build Docker Image
         working-directory: ./mybackstage
