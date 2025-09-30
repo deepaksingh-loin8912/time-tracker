@@ -38,8 +38,8 @@ jobs:
 
       - name: Generate Backstage App Non-Interactively
         run: |
-          expect -d -c "
-            set timeout 60
+          expect  -c "
+            
             set appname \$env(APP_NAME)
             spawn npx @backstage/create-app
             expect \"Enter a name for the app\"
@@ -50,17 +50,7 @@ jobs:
           APP_NAME: ${{ env.APP_NAME }}
       
 
-      - name: Generate Backstage App Non-Interactively
-        run: |
-          expect -c "
-            set appname \$env(APP_NAME)
-            spawn npx @backstage/create-app
-            expect \"Enter a name for the app\"
-            send \"\$appname\r\"
-            expect eof
-          "
-        env:
-          APP_NAME: ${{ env.APP_NAME }}
+      
 
       
 
