@@ -9,6 +9,8 @@ on:
 jobs:
   setup-backstage:
     runs-on: ubuntu-latest
+    env:
+      APP_NAME: mybackstage
 
     steps:
       - name: Checkout Repository
@@ -34,11 +36,8 @@ jobs:
       - name: Install expect (for automating prompts)
         run: sudo apt-get update && sudo apt-get install -y expect
 
-      - name: Create Backstage App (only once, or manually)
+      - name: Generate Backstage App Non-Interactively
         run: |
-          export NVM_DIR="$HOME/.nvm"
-          [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-          cd $GITHUB_WORKSPACE
           expect -c "
             set appname \$env(APP_NAME)
             spawn npx @backstage/create-app
@@ -48,7 +47,8 @@ jobs:
           "
         env:
           APP_NAME: ${{ env.APP_NAME }}
-        shell: bash
+
+      
 
       - name: Move into Backstage App Directory
         working-directory: ./mybackstage
