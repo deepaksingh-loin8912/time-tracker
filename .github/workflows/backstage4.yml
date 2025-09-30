@@ -16,34 +16,64 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
 
-      - name: Install Dependencies
+      - name: Update & Install Dependencies
         run: |
           sudo apt update
           sudo apt install -y curl git build-essential
+          sudo apt-get install -y expect
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: 20
-          cache: 'yarn'
+      - name: Install NVM
+        run: |
+          curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
 
-      - name: Install Yarn
-        run: npm install -g yarn@1
+      - name: Setup Node.js with NVM
+        run: |
+          export NVM_DIR="$HOME/.nvm"
+          [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+          nvm install 20
+          nvm use 20
+          npm install -g npm@11.6.1
+          npm install -g yarn@1
+        shell: bash
+      
 
-      - name: Create Backstage App
-        run: npx @backstage/create-app --yes --path $APP_NAME
+      - name: Generate Backstage App Non-Interactively
+        run: |
+          expect -c "
+            set appname \$env(APP_NAME)
+            spawn npx @backstage/create-app
+            expect \"Enter a name for the app\"
+            send \"\$appname\r\"
+            expect eof
+          "
+        env:
+          APP_NAME: ${{ env.APP_NAME }}
 
-      - name: Install Dependencies
+      
+
+      - name: Move into Backstage App Directory
         working-directory: ./mybackstage
-        run: yarn install
+        run: echo "Moved into mybackstage folder"
+
+      - name: Install Dependencies (Yarn)
+        working-directory: ./mybackstage
+        run: |
+          export NVM_DIR="$HOME/.nvm"
+          [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+          yarn install
+        
         env:
           YARN_ENABLE_IMMUTABLE_INSTALLS: false
+        shell: bash
 
       - name: Build Backend
         working-directory: ./mybackstage
         run: |
+          export NVM_DIR="$HOME/.nvm"
+          [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
           yarn workspace backend build
           yarn build:backend
+        shell: bash
 
       - name: Build Docker Image
         working-directory: ./mybackstage
