@@ -78,4 +78,4 @@ jobs:
       - name: Build Docker Image
         working-directory: ./mybackstage
         run: |
-          docker build -f packages/backend/Dockerfile -t backstage .
+          docker build -f packages/backend/Dockerfile -t backstage . --load
