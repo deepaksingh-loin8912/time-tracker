@@ -8,7 +8,7 @@ on:
 
 jobs:
   setup-backstage:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted  # or ubuntu-latest if you want GitHub runners
     env:
       APP_NAME: mybackstage
 
