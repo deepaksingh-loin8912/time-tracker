@@ -36,7 +36,15 @@ jobs:
         run: |
           export NVM_DIR="$HOME/.nvm"
           [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-          npx @backstage/create-app --yes mybackstage
+          expect -c "
+            set appname \$env(APP_NAME)
+            spawn npx @backstage/create-app
+            expect \"Enter a name for the app\"
+            send \"\$appname\r\"
+            expect eof
+          "
+        env:
+          APP_NAME: ${{ env.APP_NAME }}
         shell: bash
 
       - name: Move into Backstage App Directory
