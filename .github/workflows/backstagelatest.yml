@@ -81,6 +81,7 @@ jobs:
       - name: Build Docker Image
         working-directory: ./mybackstage
         run: |
+          export DOCKER_BUILDKIT=1
           docker build -f packages/backend/Dockerfile -t backstage .
 
       - name: Save Backstage Docker Image as TAR
