@@ -1,0 +1,66 @@
+name: Setup and Build Backstage App
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  setup-backstage:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Update & Install Dependencies
+        run: |
+          sudo apt update && sudo apt upgrade -y
+          sudo apt install -y curl git build-essential
+
+      - name: Install NVM
+        run: |
+          curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+
+      - name: Setup Node.js with NVM
+        run: |
+          export NVM_DIR="$HOME/.nvm"
+          [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+          nvm install 20
+          nvm use 20
+          npm install -g npm@11.6.1
+        shell: bash
+
+      - name: Create Backstage App (only once, or manually)
+        run: |
+          export NVM_DIR="$HOME/.nvm"
+          [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+          npx @backstage/create-app --yes mybackstage
+        shell: bash
+
+      - name: Move into Backstage App Directory
+        working-directory: ./mybackstage
+        run: echo "Moved into mybackstage folder"
+
+      - name: Install Dependencies (Yarn)
+        working-directory: ./mybackstage
+        run: |
+          export NVM_DIR="$HOME/.nvm"
+          [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+          yarn install --immutable
+        shell: bash
+
+      - name: Build Backend
+        working-directory: ./mybackstage
+        run: |
+          export NVM_DIR="$HOME/.nvm"
+          [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+          yarn workspace backend build
+          yarn build:backend
+        shell: bash
+
+      - name: Build Docker Image
+        working-directory: ./mybackstage
+        run: |
+          docker build -f packages/backend/Dockerfile -t backstage .
