@@ -65,8 +65,7 @@ jobs:
       - name: Patch Dockerfile to fix Yarn v3 focus issue
         working-directory: ${{ env.APP_NAME }}
         run: |
-          sed -i "/yarn workspaces focus/c\
-          RUN --mount=type=cache,target=/home/node/.cache/yarn,sharing=locked,uid=1000,gid=1000 npm install -g corepack && corepack enable && corepack prepare yarn@3.6.4 --activate && yarn workspaces focus --all --production && yarn cache clean" packages/backend/Dockerfile
+          sed -i "/yarn workspaces focus/c RUN --mount=type=cache,target=/home/node/.cache/yarn,sharing=locked,uid=1000,gid=1000 npm install -g corepack && corepack enable && corepack prepare yarn@3.6.4 --activate && yarn workspaces focus --all --production && yarn cache clean" packages/backend/Dockerfile
 
       - name: Enable Docker BuildKit
         run: echo "DOCKER_BUILDKIT=1" >> $GITHUB_ENV
