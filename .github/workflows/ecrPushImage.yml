@@ -31,7 +31,7 @@ jobs:
       - name: Login to Amazon ECR
         run: |
           aws ecr get-login-password --region us-west-2 | \
-            docker login --username AWS --password-stdin 266980971030.dkr.ecr.us-west-2.amazonaws.com
+          docker login --username AWS --password-stdin 266980971030.dkr.ecr.us-west-2.amazonaws.com
 
       - name: Push Backstage Docker Image to ECR
         run: |
