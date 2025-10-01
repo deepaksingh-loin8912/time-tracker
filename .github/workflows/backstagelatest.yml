@@ -95,11 +95,11 @@ jobs:
       
 
       - name: Upload Backstage Docker Image Artifact
+        
         uses: actions/upload-artifact@v4
         
         with:
           name: backstage-image
-          working-directory: ./mybackstage
-          path: docker_images/backstage-latest.tar
+          path: ./mybackstage/docker_images/backstage-latest.tar
           
          
