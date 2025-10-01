@@ -110,6 +110,11 @@ jobs:
         with:
              role-to-assume: arn:aws:iam::266980971030:role/iam-gh-ecr_admin
              aws-region: ap-southeast-2
+             
+      - name: Setup AWS CLI
+        uses: aws-actions/setup-aws-cli@v2
+        with:
+          version: '2.x'
 
       - name: Login to Amazon ECR
         run: |
