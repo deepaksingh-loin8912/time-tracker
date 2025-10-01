@@ -30,13 +30,13 @@ jobs:
 
       - name: Login to Amazon ECR
         run: |
-          aws ecr get-login-password --region us-west-2 | \
-          docker login --username AWS --password-stdin 266980971030.dkr.ecr.us-west-2.amazonaws.com
+          aws ecr get-login-password --region ap-southeast-2 | \
+          docker login --username AWS --password-stdin 266980971030.dkr.ecr.ap-southeast-2.amazonaws.com
 
       - name: Push Backstage Docker Image to ECR
         run: |
           chmod +x scripts/push-docker-image.sh
-          ./scripts/push-docker-images123.sh load_push scripts/backstage.docker-images.json
+          ./scripts/push-docker-image.sh load_push scripts/backstage.docker-images.json
         env:
           AWS_REGION: ap-southeast-2
           AWS_ACCOUNT_ID: 266980971030
