@@ -111,12 +111,7 @@ jobs:
              role-to-assume: arn:aws:iam::266980971030:role/iam-gh-ecr_admin
              aws-region: ap-southeast-2
              
-      - name: Install AWS CLI
-        run: |
-          curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-          unzip awscliv2.zip
-          sudo ./aws/install
-          aws --version
+     
 
       - name: Login to Amazon ECR
         run: |
