@@ -11,7 +11,13 @@ permissions:
 
 
 jobs:
-  
+  setup-backstage:
+    runs-on: self-hosted  # or ubuntu-latest if you want GitHub runners
+    env:
+      APP_NAME: mybackstage
+
+    steps:
+      
           
 
       - name: Configure AWS credentials
