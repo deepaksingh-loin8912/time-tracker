@@ -4,8 +4,8 @@ set -euo pipefail
 ACTION="$1"
 JSON_FILE="${2:-scripts/docker-images.json}"
 
-AWS_REGION="${AWS_REGION:-us-west-2}"
-AWS_ACCOUNT_ID="${AWS_ACCOUNT_ID:-891376911727}"
+AWS_REGION="${AWS_REGION:-ap-southeast-2}"
+AWS_ACCOUNT_ID="${AWS_ACCOUNT_ID:-266980971030}"
 ECR_REGISTRY="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
 
 if [[ "$ACTION" != "pull_save" && "$ACTION" != "load_push" ]]; then
