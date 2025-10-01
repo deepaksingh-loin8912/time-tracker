@@ -92,15 +92,14 @@ jobs:
           mkdir -p docker_images
           docker save backstage:latest -o docker_images/backstage-latest.tar
 
-      - name: Save Backstage Docker Image as TAR
-        working-directory: ./mybackstage
-        run: |
-          mkdir -p docker_images
-          docker save backstage:latest -o docker_images/backstage-latest.tar
+      
 
       - name: Upload Backstage Docker Image Artifact
         uses: actions/upload-artifact@v4
+        
         with:
           name: backstage-image
+          working-directory: ./mybackstage
           path: docker_images/backstage-latest.tar
           
+         
