@@ -1,0 +1,7 @@
+[
+  {
+    "source": "backstage",
+    "tag": "latest",
+    "target_repo": "backstage"
+  }
+]
