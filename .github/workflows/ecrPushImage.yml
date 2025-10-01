@@ -1,0 +1,39 @@
+name: Setup and Build Backstage App
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+permissions:
+  id-token: write
+  contents: read
+
+
+jobs:
+  
+          
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+             role-to-assume: arn:aws:iam::266980971030:role/iam-gh-ecr_admin
+             aws-region: ap-southeast-2
+             
+     
+
+      - name: Login to Amazon ECR
+        run: |
+          aws ecr get-login-password --region us-west-2 | \
+            docker login --username AWS --password-stdin 266980971030.dkr.ecr.us-west-2.amazonaws.com
+
+      - name: Push Backstage Docker Image to ECR
+        run: |
+          chmod +x scripts/push-docker-image.sh
+          ./scripts/push-docker-image.sh load_push scripts/backstage.docker-images.json
+        env:
+          AWS_REGION: ap-southeast-2
+          AWS_ACCOUNT_ID: 266980971030
+
+          
+         
