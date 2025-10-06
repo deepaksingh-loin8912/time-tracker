@@ -25,7 +25,10 @@ jobs:
           sudo apt update
           sudo apt install -y curl git build-essential
           sudo apt-get install -y expect
-
+      - name: Test access to EKS
+        run: |
+           aws eks update-kubeconfig --region ap-southeast-2 --name my-cluster1
+           kubectl get nodes
       - name: Install NVM
         run: |
           curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
