@@ -62,11 +62,11 @@ jobs:
       
 
       - name: Move into Backstage App Directory
-        working-directory: ./mybackstage
+        working-directory: ./${{ env.APP_NAME }}
         run: echo "Moved into mybackstage folder"
 
       - name: Install Dependencies (Yarn)
-        working-directory: ./mybackstage
+        working-directory: ./${{ env.APP_NAME }}
         run: |
           export NVM_DIR="$HOME/.nvm"
           [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
@@ -77,18 +77,19 @@ jobs:
         shell: bash
 
       - name: Build Backend
-        working-directory: ./mybackstage
+        working-directory: ./${{ env.APP_NAME }}
         run: |
           export NVM_DIR="$HOME/.nvm"
           [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
           yarn workspace backend build
           yarn build:backend
         shell: bash
+        
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
       - name: Build Docker Image
-        working-directory: ./mybackstage
+        working-directory: ./${{ env.APP_NAME }}
         run: |
           export DOCKER_BUILDKIT=1
           docker build -f packages/backend/Dockerfile -t backstage .
